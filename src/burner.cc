@@ -38,7 +38,7 @@ int main() {
     vector<double>  sootScales{1E16, 0.01};
     SS.setSootScales(sootScales);
 
-    //----------- 
+    ///////////// setup
 
     int loglevel = 1;
     bool refine_grid = true;
@@ -69,9 +69,9 @@ int main() {
     double Tad = gas->temperature();
 
 
-    //////////////// build each domain
+    ///////////// build each domain
 
-    //------- create the inlet
+    //----------- create the inlet
 
     Inlet1D inlet;
 
@@ -80,20 +80,20 @@ int main() {
     inlet.setTemperature(Tin);
     //inlet.setSpreadRate(10.);
 
-    //-------- create the flow
+    //----------- create the flow
 
     //StFlow flow(gas);
     StFlow flow(gas, 1, 1, nsoot, SM, SS);
     flow.setAxisymmetricFlow();
 
-    //-------- initial grid
+    //----------- initial grid
 
     vector<double> z{0.0, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0};
     for(int i=0; i<z.size(); i++)
         z[i] *= Ldomain;
     flow.setupGrid(z.size(), &z[0]);
 
-    //-------- temperature profile
+    //----------- temperature profile
 
     ifstream ifile("zT.dat");
     vector_fp zTz, zTT;
@@ -110,24 +110,24 @@ int main() {
 
     flow.setFixedTempProfile(zTz, zTT);
 
-    //-------- set transport and kinetics objects
+    //----------- set transport and kinetics objects
 
     sol->setTransport("mixture-averaged");
     flow.setTransport(*sol->transport());
     flow.setKinetics(*sol->kinetics());
     flow.setPressure(P);
 
-    //-------- create the outlet
+    //----------- create the outlet
 
     Outlet1D outlet;
 
-    ///////////////////// create the container and insert the domains
+    ///////////// create the container and insert the domains
 
     std::vector<Domain1D*> domains { &inlet, &flow, &outlet };
 
     Sim1D flame(domains);
 
-    //----------- Supply initial guess----------------------
+    //----------- Supply initial guess, flame parameters
 
     vector_fp locs{0.0, 0.3, 0.7, 1.0};
     vector_fp value;
@@ -163,11 +163,11 @@ int main() {
 
     flame.setRefineCriteria(flowdomain,ratio,slope,curve);
 
-    ////////// solve the problem
+    ///////////// solve the problem
 
     flame.solve(loglevel,refine_grid);
 
-    ////////// get soot
+    ///////////// recover soot from flame 
 
     vector_fp rhovec;
     vector<vector_fp> soot(nsoot);
@@ -182,10 +182,9 @@ int main() {
         for(size_t k=0; k<nsoot; k++) {
             soot[k].push_back(flame.value(flowdomain, flow.componentIndex("soot_var_"+to_string(k)), n)*gas->density()*SS.sootScales[k]);
         }
-
     }
 
-    ////////// output
+    ///////////// output
 
 
     ofstream ofile("burner.out");
@@ -220,36 +219,5 @@ int main() {
     flame.showSolution();
 
     return 0;
-
-
-
-     // vector_fp zvec,Tvec,COvec,CO2vec,Uvec;
-
-     // print("\n{:9s}\t{:8s}\t{:5s}\t{:7s}\t{:7s}\n",
-     //       "z (m)", "T (K)", "rho (kg/m3)", "U (m/s)", "Y(CO)");
-     // for (size_t n = 0; n < flow.nPoints(); n++) {
-     //     Tvec.push_back(flame.value(flowdomain,flow.componentIndex("T"),n));
-     //     COvec.push_back(flame.value(flowdomain,
-     //                                 flow.componentIndex("CO"),n));
-     //     CO2vec.push_back(flame.value(flowdomain,
-     //                                  flow.componentIndex("CO2"),n));
-     //     Uvec.push_back(flame.value(flowdomain,
-     //                                flow.componentIndex("velocity"),n));
-     //     zvec.push_back(flow.grid(n));
-     //     print("{:9.6f}\t{:8.3f}\t{:8.3f}\t{:5.3f}\t{:7.5f}",
-     //           flow.grid(n), Tvec[n], rhovec[n], Uvec[n], COvec[n]);
-     // }
-
-     // std::ofstream outfile("burner2.out", std::ios::trunc);
-     // outfile << "#  Grid,   Temperature,   rho,    Uvec,   CO,    CO2\n";
-     // for (size_t n = 0; n < flow.nPoints(); n++) {
-     //     print(outfile, " {:11.3e}  {:11.3e}  {:11.3e}  {:11.3e}  {:11.3e}  {:11.3e}\n",
-     //           flow.grid(n), Tvec[n], rhovec[n], Uvec[n], COvec[n], CO2vec[n]);
-     // }
-    // outfile.close();
-
-    // flame.showSolution();
-
-    // return 0;
 }
 
