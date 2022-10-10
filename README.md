@@ -11,20 +11,22 @@ cmake ..
 make
 make install
 ```
-* creates burner.x in the top directory
+* creates burner.x in the run directory
 
 
 ### Run in top level:
 ```
-./burner.x
+run/burner.x
 ```
 
-### Output:
-* burner.out
+### Outut
+Creates burner.out.
 
 ### Other
 * zT.dat is the fixed temperature profile that is interpolated
     * first column is z (m), second column is T (K)
+* Experimental data: soot.exp, which has three experiments. 
+    * These are separated in soot.exp_1, etc.
 
 
 
