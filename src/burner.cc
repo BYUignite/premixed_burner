@@ -27,6 +27,8 @@ using std::to_string;
 
 int main() {
 
+    bool dosoot = false;                                // change just this to turn soot on and off
+
     nucleationMech  n = nucleationMech::LL;             // Nucleation: NONE, LL, LIN, PAH
     growthMech      g = growthMech::LL;                 // Surface growth: NONE, LL, LIN, HACA
     oxidationMech   x = oxidationMech::LL;              // Oxidation: NONE, LL, LEE_NEOH, NSC_NEOH, HACA
@@ -82,8 +84,8 @@ int main() {
 
     //----------- create the flow
 
-    //StFlow flow(gas);
-    StFlow flow(gas, 1, 1, nsoot, SM, SS);
+    int nscant = dosoot ? nsoot : 0;
+    StFlow flow(gas, 1, 1, nscant, SM, SS);   // soot
     flow.setAxisymmetricFlow();
 
     //----------- initial grid
@@ -179,9 +181,9 @@ int main() {
             y[k] = flame.value(flowdomain, flow.componentIndex(gas->speciesName(k)), n);
         gas->setState_TPX(T, 101325, &y[0]);
         rhovec.push_back(gas->density());
-        for(size_t k=0; k<nsoot; k++) {
-            soot[k].push_back(flame.value(flowdomain, flow.componentIndex("soot_var_"+to_string(k)), n)*gas->density()*SS.sootScales[k]);
-        }
+        if(dosoot)
+            for(size_t k=0; k<nsoot; k++)
+                soot[k].push_back(flame.value(flowdomain, flow.componentIndex("soot_var_"+to_string(k)), n)*gas->density()*SS.sootScales[k]);
     }
 
     ///////////// output
@@ -197,8 +199,9 @@ int main() {
     ofile << setw(19) << "Y_CO ";
     ofile << setw(19) << "Y_CO2 ";
     ofile << setw(19) << "Y_C2H2 ";
-    for(size_t k=0; k<nsoot; k++)
-        ofile << setw(19) << "S_" + to_string(k) + " ";
+    if(dosoot)
+        for(size_t k=0; k<nsoot; k++)
+            ofile << setw(19) << "S_" + to_string(k) + " ";
 
     ofile << scientific;
     ofile << setprecision(10);
@@ -211,8 +214,9 @@ int main() {
               << setw(19) << flame.value(flowdomain, flow.componentIndex("CO"),n)
               << setw(19) << flame.value(flowdomain, flow.componentIndex("CO2"),n)
               << setw(19) << flame.value(flowdomain, flow.componentIndex("C2H2"),n);
-        for(size_t k=0; k<nsoot; k++)
-            ofile << setw(19) << soot[k][n];
+        if(dosoot)
+            for(size_t k=0; k<nsoot; k++)
+                ofile << setw(19) << soot[k][n];
     }
     ofile.close();
 

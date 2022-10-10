@@ -4,7 +4,7 @@ Corresponds to ISF 2a
 
 Modified from cantera sample flamespeed.cpp. 
 
-Needs Cantera with soot implementation (unless you turn off soot in burner.cc).
+Requires cantera with sootlib integration.
 
 ### Build
 ```
