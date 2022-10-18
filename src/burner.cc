@@ -27,13 +27,13 @@ using std::to_string;
 
 int main() {
 
-    bool dosoot = false;                                // change just this to turn soot on and off
+    bool dosoot = true;                                // change just this to turn soot on and off
 
-    nucleationMech  n = nucleationMech::LL;             // Nucleation: NONE, LL, LIN, PAH
-    growthMech      g = growthMech::LL;                 // Surface growth: NONE, LL, LIN, HACA
+    nucleationMech  n = nucleationMech::LIN;            // Nucleation: NONE, LL, LIN, PAH
+    growthMech      g = growthMech::LIN;                // Surface growth: NONE, LL, LIN, HACA
     oxidationMech   x = oxidationMech::LL;              // Oxidation: NONE, LL, LEE_NEOH, NSC_NEOH, HACA
-    coagulationMech c = coagulationMech::LL;            // Coagulation: NONE, LL, FUCHS, FRENK
-    psdMech         PSD = psdMech::QMOM;                // PSD mechanisms: MONO, LOGN, QMOM, MOMIC
+    coagulationMech c = coagulationMech::FM;            // Coagulation: NONE, LL, FUCHS, FRENK
+    psdMech         PSD = psdMech::MONO;                // PSD mechanisms: MONO, LOGN, QMOM, MOMIC
     int             nsoot = 2;                          // number of soot moments
     sootModel       SM = sootModel(PSD, nsoot, n, g, x, c);
     state           SS = state(nsoot);
