@@ -51,7 +51,7 @@ int main() {
     double uin     = 0.0673;                      // m/sec
     double Ldomain = 0.03;                        // domain size (m)
 
-    auto sol = newSolution("gri30.yaml", "gri30", "None");
+    auto sol = newSolution("gri30.yaml", "gri30", "mixture-averaged");
     auto gas = sol->thermo();
 
     int nsp  = gas->nSpecies();
@@ -80,12 +80,11 @@ int main() {
     inlet.setMoleFractions(&X[0]);
     inlet.setMdot(mdot);
     inlet.setTemperature(Tin);
-    //inlet.setSpreadRate(10.);
 
     //----------- create the flow
 
     int nscant = dosoot ? nsoot : 0;
-    StFlow flow(gas, 1, 1, nscant, SM, SS);   // soot
+    StFlow flow(sol, 1,1, nscant, SM, SS);
     flow.setAxisymmetricFlow();
 
     //----------- initial grid
@@ -114,8 +113,8 @@ int main() {
 
     //----------- set transport and kinetics objects
 
-    sol->setTransport("mixture-averaged");
-    flow.setTransport(*sol->transport());
+    sol->setTransportModel("mixture-averaged");
+    // flow.setTransport(*sol->transport());
     flow.setKinetics(*sol->kinetics());
     flow.setPressure(P);
 
@@ -145,12 +144,12 @@ int main() {
         flame.setInitialGuess(gas->speciesName(i),locs,value);
     }
 
-    double ndens0 = 1;                    // scaled values (code solves and outputs scaled Mhat0, Mhat1)
-    double rhoYs0 = 1;                    // the scales are hard coded in Cantera StFlow.cpp: Mhat0scale=1E16, Mhat1scale = 0.01. 
-    value = {0.0, 0.0, ndens0, ndens0};   // so, to get fv: Mhat1 * 0.01 * rho / rhosoot
-    flame.setInitialGuess("soot_var_0",locs,value);
-    value = {0.0, 0.0, rhoYs0, rhoYs0};
-    flame.setInitialGuess("soot_var_1",locs,value);
+    // double ndens0 = 1;                    // scaled values (code solves and outputs scaled Mhat0, Mhat1)
+    // double rhoYs0 = 1;                    // the scales are hard coded in Cantera StFlow.cpp: Mhat0scale=1E16, Mhat1scale = 0.01. 
+    // value = {0.0, 0.0, ndens0, ndens0};   // so, to get fv: Mhat1 * 0.01 * rho / rhosoot
+    // flame.setInitialGuess("soot_var_0",locs,value);
+    // value = {0.0, 0.0, rhoYs0, rhoYs0};
+    // flame.setInitialGuess("soot_var_1",locs,value);
 
     inlet.setMoleFractions(&X[0]);
     inlet.setMdot(mdot);
@@ -224,4 +223,3 @@ int main() {
 
     return 0;
 }
-
