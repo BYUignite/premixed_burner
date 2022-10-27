@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-#include "sootModel.h"
+#include "sootHeaders.h"
 
 using namespace Cantera;
 using namespace soot;
@@ -29,13 +29,15 @@ int main() {
 
     bool dosoot = true;                                // change just this to turn soot on and off
 
-    nucleationMech  n = nucleationMech::LIN;            // Nucleation: NONE, LL, LIN, PAH
-    growthMech      g = growthMech::LIN;                // Surface growth: NONE, LL, LIN, HACA
-    oxidationMech   x = oxidationMech::LL;              // Oxidation: NONE, LL, LEE_NEOH, NSC_NEOH, HACA
-    coagulationMech c = coagulationMech::FM;            // Coagulation: NONE, LL, FUCHS, FRENK
-    psdMech         PSD = psdMech::MONO;                // PSD mechanisms: MONO, LOGN, QMOM, MOMIC
+    nucleationModel  *nucl = new soot::nucleationModel_LIN();
+    growthModel      *grow = new soot::growthModel_LIN();
+    oxidationModel   *oxid = new soot::oxidationModel_LL();
+    coagulationModel *coag = new soot::coagulationModel_FM();
+
     int             nsoot = 2;                          // number of soot moments
-    sootModel       SM = sootModel(PSD, nsoot, n, g, x, c);
+
+    sootModel *SM = new soot::sootModel_MONO(nsoot, nucl, grow, oxid, coag);
+
     state           SS = state(nsoot);
     vector<double>  sootScales{1E16, 0.01};
     SS.setSootScales(sootScales);
@@ -69,7 +71,6 @@ int main() {
     gas->getMassFractions(&yout[0]);
     double rho_out = gas->density();
     double Tad = gas->temperature();
-
 
     ///////////// build each domain
 
@@ -220,6 +221,13 @@ int main() {
     ofile.close();
 
     flame.showSolution();
+
+    ///////////// 
+
+    delete(nucl);
+    delete(grow);
+    delete(oxid);
+    delete(coag);
 
     return 0;
 }
