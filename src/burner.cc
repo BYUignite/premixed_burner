@@ -37,6 +37,7 @@ int main() {
     int             nsoot = 2;                          // number of soot moments
 
     sootModel *SM = new soot::sootModel_MONO(nsoot, nucl, grow, oxid, coag);
+    //sootModel *SM = new soot::sootModel_QMOM(nsoot, nucl, grow, oxid, coag);
 
     state           SS = state(nsoot);
     vector<double>  sootScales{1E16, 0.01};
